@@ -6,17 +6,13 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { annualIncome, investments, otherDeductions, otherIncome, regime } = body
 
-    // Convert string inputs to numbers
     const totalIncome = Number(annualIncome) + Number(otherIncome)
     const totalDeductions = regime === "old" ? Number(investments) + Number(otherDeductions) : 0
 
-    // Calculate taxable income
     const taxableIncome = Math.max(totalIncome - totalDeductions, 0)
 
-    // Calculate tax based on selected regime
     const { totalTax: taxPayable, slabwiseTax } = calculateTotalTax(taxableIncome, regime as TaxRegime)
 
-    // Generate tax savings suggestions
     const taxSavings = []
     if (regime === "old") {
       if (investments < 150000) {
@@ -26,7 +22,6 @@ export async function POST(req: Request) {
         taxSavings.push(`Consider NPS contribution up to ₹50,000 under Section 80CCD(1B)`)
       }
     } else {
-      // Calculate tax in old regime for comparison
       const { totalTax: oldRegimeTax } = calculateTotalTax(totalIncome, "old")
       if (oldRegimeTax < taxPayable) {
         taxSavings.push(
